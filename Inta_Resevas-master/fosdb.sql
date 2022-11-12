@@ -213,11 +213,11 @@ CREATE TABLE `tbl_staff` (
 --
 
 INSERT INTO `tbl_staff` (`staffID`, `username`, `password`, `status`, `role`) VALUES
-(1, 'Juan', '1234abcd..', 'Online', 'chef'),
+(1, 'Juan', '1234abcd..', 'Online', 'Usuario'),
 (4, 'Pedro', '1234abcd..', 'Online', 'Usuario'),
-(5, 'Emily', '1234abcd..', 'Online', 'chef'),
-(6, 'Robert', '1234abcd..', 'Online', 'chef'),
-(7, 'Sofia', 'abc123', 'Offline', 'Mesero'),
+(5, 'Emily', '1234abcd..', 'Online', 'Usuario'),
+(6, 'Robert', '1234abcd..', 'Online', 'Usuario'),
+(7, 'Sofia', 'abc123', 'Offline', 'Usuario'),
 (10, 'maria', '1234abcd..', 'Offline', 'Administrador'),
 (12, 'jano', '1234abcd..', 'Offline', 'Usuario');
 
