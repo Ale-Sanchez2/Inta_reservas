@@ -1,4 +1,4 @@
-<?php 
+<?php
   include("../functions.php");
 
   if((!isset($_SESSION['uid']) && !isset($_SESSION['username']) && isset($_SESSION['user_level'])) ) 
@@ -7,14 +7,9 @@
   if($_SESSION['user_level'] != "admin")
     header("Location: login.php");
 
-  // echo $_SESSION['uid'];
-  //echo $_SESSION['username'];
-  //echo $_SESSION['user_level'];
-
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
   <head>
 
@@ -24,7 +19,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Panel de Control - ConfiguroWeb</title>
+    <title>Reservas | ConfirugoWeb</title>
 
     <!-- Bootstrap core CSS-->
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -83,7 +78,6 @@
             <i class="far fa-bell"></i>
             <span>Reservas</span></a>
         </li>
-
         <li class="nav-item">
           <a class="nav-link" href="staff.php">
             <i class="fas fa-fw fa-user-circle"></i>
@@ -109,85 +103,143 @@
             <li class="breadcrumb-item">
               <a href="index.php">Panel de Control</a>
             </li>
-            <li class="breadcrumb-item active">Vista General</li>
+            <li class="breadcrumb-item active">Reservas</li>
           </ol>
 
           <!-- Page Content -->
-          <h1>Panel de Administración</h1>
+          <h1>Administración de Maquinas</h1>
           <hr>
-          <p>Vista General del Sistema.</p>
+          <p>Todos los datos de venta se encuentran aquí.</p>
 
-          <div class="row">
-            <div class="col-lg-8">
-              <div class="card mb-3">
-                <div class="card-header">
-                  <i class="fas fa-utensils"></i>
-                  Lista de Pedidos Actuales</div>
-                <div class="card-body">
-                  <table id="tblCurrentOrder" table class="table table-bordered" width="100%" cellspacing="0">
+          
+
+          <div class="card mb-3">
+            <div class="card-header">
+              <i class="fas fa-chart-area"></i>
+              Lista de Órdenes de Reservas</div>
+            <div class="card-body">
+              <table id="tblCurrentOrder" class="table table-bordered" width="100%" cellspacing="0">
                     <thead>
-                      <th>Número de Orden</th>
+                      <th># Orden</th>
                       <th>Menú</th>
-                      <th>Nombre de Ítem</th>
+                      <th>Nombre de Producto</th>
                       <th class='text-center'>Cantidad</th>
                       <th class='text-center'>Estado</th>
+                      <th class='text-center'>Total (hrs)</th>
+                      <th class='text-center'>Fecha</th>
                     </thead>
                     
                     <tbody id="tblBodyCurrentOrder">
-                      
-                    </tbody>
-                  </table>
-                </div>
-                <div class="card-footer small text-muted"><i>Se refresca automáticamente cada 5 segundos</i></div>
-              </div>
-            </div>
+                      <?php 
+                      $displayOrderQuery =  "
+                        SELECT o.orderID, m.menuName, OD.itemID,MI.menuItemName,OD.quantity,O.status,mi.price ,o.order_date
+                        FROM tbl_order O
+                        LEFT JOIN tbl_orderdetail OD
+                        ON O.orderID = OD.orderID
+                        LEFT JOIN tbl_menuitem MI
+                        ON OD.itemID = MI.itemID
+                        LEFT JOIN tbl_menu M
+                        ON MI.menuID = M.menuID
+                        ";
 
-            <div class="col-lg-4">
-              <div class="card mb-3">
-                <div class="card-header">
-                  <i class="fas fa-chart-bar""></i>
-                  Disponibilidad del Personal</div>
-                <div class="card-body">
-                  <table table class="table table-bordered text-center" width="100%" cellspacing="0">
-                    <tr>
-                      <td><b>Personal</b></td>
-                      <td><b>Estado</b></td>
-                    </tr>
+                      if ($orderResult = $sqlconnection->query($displayOrderQuery)) {
+                          
+                        $currentspan = 0;
+                        $total = 0;
 
-                    <?php 
-                      $displayStaffQuery = "SELECT username,status FROM tbl_staff";
+                        //if no order
+                        if ($orderResult->num_rows == 0) {
 
-                          if ($result = $sqlconnection->query($displayStaffQuery)) {
-                            while($staff = $result->fetch_array(MYSQLI_ASSOC)) {
-                              echo "<tr>";
-                              echo "<td>{$staff['username']}</td>";
+                          echo "<tr><td class='text-center' colspan='7' >Actualmente no hay pedido en este momento. </td></tr>";
+                        }
 
-                              if ($staff['status'] == "Online") {
-                                echo "<td><span class=\"badge badge-success\">Activo</span></td>";
-                              }
+                        else {
+                          while($orderRow = $orderResult->fetch_array(MYSQLI_ASSOC)) {
 
-                              if ($staff['status'] == "Offline") {
-                                echo "<td><span class=\"badge badge-secondary\">Inactivo</span></td>";
-                              }
+                            //basically count rowspan so no repetitive display id in each table row
+                            $rowspan = getCountID($orderRow["orderID"],"orderID","tbl_orderdetail"); 
 
-                              echo "</tr>";
+                            if ($currentspan == 0) {
+                              $currentspan = $rowspan;
+                              $total = 0;
                             }
+
+                            //get total for each order id
+                            $total += ($orderRow['price']*$orderRow['quantity']);
+
+                            echo "<tr>";
+
+                            if ($currentspan == $rowspan) {
+                              echo "<td rowspan=".$rowspan."># ".$orderRow['orderID']."</td>";
+                            }
+
+                            echo "
+                              <td>".$orderRow['menuName']."</td>
+                              <td>".$orderRow['menuItemName']."</td>
+                              <td class='text-center'>".$orderRow['quantity']."</td>
+                            ";
+
+                            if ($currentspan == $rowspan) {
+
+                              $color = "badge";
+
+                              switch ($orderRow['status']) {
+                                case 'waiting':
+                                  $color = "badge badge-warning";
+                                  break;
+                                
+                                case 'preparing':
+                                  $color = "badge badge-primary";
+                                  break;
+
+                                case 'ready':
+                                  $color = "badge badge-success";
+                                  break;
+
+                                case 'cancelled':
+                                  $color = "badge badge-danger";
+                                  break;
+
+                                case 'finish':
+                                  $color = "badge badge-success";
+                                  break;
+
+                                case 'Completed':
+                                  $color = "badge badge-success";
+                                  break;
+                              }
+
+                              echo "<td class='text-center' rowspan=".$rowspan."><span class='{$color}'>".$orderRow['status']."</span></td>";
+
+                              echo "<td rowspan=".$rowspan." class='text-center'>".getSalesTotal($orderRow['orderID'])."</td>";
+
+                              echo "<td rowspan=".$rowspan." class='text-center'>".$orderRow['order_date']."</td>";
+
+                            
+                              echo "</td>";
+
+                            }
+
+                            echo "</tr>";
+
+                            $currentspan--;
                           }
-                    ?>
-                  </table>
-                </div>
-              </div>
+                        }
+                        } 
+                      ?>
+                    </tbody>
+              </table>
+            </div>
             </div>
           </div>
 
-        </div>
         <!-- /.container-fluid -->
 
         <!-- Sticky Footer -->
         <footer class="sticky-footer">
           <div class="container my-auto">
             <div class="copyright text-center my-auto">
-              <span>Copyright © Sistema de Reservas ConfiguroWeb 2022</span>
+              <span>Copyright © Sistema de Reservas INTA ConfiguroWeb 2022</span>
             </div>
           </div>
         </footer>
@@ -213,7 +265,7 @@
               <span aria-hidden="true">×</span>
             </button>
           </div>
-          <div class="modal-body">Seleccione "Cerrar sesión" a continuación si está listo para finalizar su sesión actual.</div>
+          <div class="modal-body">Seleccione "Cerrar Sesión" a continuación si está listo para finalizar su sesión actual.</div>
           <div class="modal-footer">
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
             <a class="btn btn-primary" href="logout.php">Cerrar Sesión</a>
@@ -231,22 +283,6 @@
 
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin.min.js"></script>
-
-    <script type="text/javascript">
-
-    $( document ).ready(function() {
-        refreshTableOrder();
-    });
-
-    function refreshTableOrder() {
-      $( "#tblBodyCurrentOrder" ).load( "displayorder.php?cmd=display" );
-    }
-
-    //refresh order current list every 3 secs
-    setInterval(function(){ refreshTableOrder(); }, 3000);
-
-  </script>
-
 
   </body>
 

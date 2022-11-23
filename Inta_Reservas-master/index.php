@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Restaurante | ConfiguroWeb</title>
+	<title>Inta Reservas | ConfiguroWeb</title>
 	<link rel="stylesheet" href="./style.css">
 
 
-<h1 style="text-align:center;">Restaurante | ConfiguroWeb</h1>
+<h1 style="text-align:center;">Inta Reservas | ConfiguroWeb</h1>
 
 
 	<a href="staff" >Empleado</a>

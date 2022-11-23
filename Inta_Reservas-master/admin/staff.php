@@ -56,7 +56,8 @@
 
     <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
-      <a class="navbar-brand mr-1" href="index.php">Restaurante | ConfiguroWeb</a>
+      <a class="navbar-brand mr-1" href="index.php">Reservas INTA | ConfiguroWeb</a>
+
 
       <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
         <i class="fas fa-bars"></i>
@@ -133,7 +134,7 @@
               <div class="card mb-3">
                 <div class="card-header">
                   <i class="fas fa-user-circle"></i>
-                  Lista Actual de Clientes</div>
+                  Lista Actual de Empleados</div>
                 <div class="card-body">
                   <table class="table table-bordered text-center" id="dataTable" width="100%" cellspacing="0">
                     <tr>
